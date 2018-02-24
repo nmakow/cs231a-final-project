@@ -1,0 +1,8 @@
+*.swp
+*.pyc
+.env/*
+.ipynb_checkpoints/*
+cs231n/datasets/coco-captioning/*
+cs231n/datasets/*.meta
+cs231n/datasets/*.index
+cs231n/datasets/*.npz
