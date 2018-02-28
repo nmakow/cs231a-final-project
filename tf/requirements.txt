@@ -1,0 +1,10 @@
+numpy
+matplotlib
+scipy
+scikit-image
+hickle
+Pillow
+h5py
+future
+tensorflow==1.4.1 # Change to tensorflow-gpu if you want to use GPU
+tensorflow-tensorboard==0.4.0
