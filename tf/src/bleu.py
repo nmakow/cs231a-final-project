@@ -1,7 +1,7 @@
 import cPickle as pickle
 import os
 import sys
-sys.path.append('../coco-caption')
+sys.path.append('../')
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.rouge.rouge import Rouge
 from pycocoevalcap.cider.cider import Cider

@@ -80,7 +80,7 @@ class CaptioningSolver(object):
         print "Iterations per epoch: %d" % n_batches_train
 
         config = tf.ConfigProto(allow_soft_placement=True)
-        config.gpu_options.allow_growth = True
+        # config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
             sess.run(tf.global_variables_initializer())
 
@@ -150,14 +150,14 @@ class CaptioningSolver(object):
 
 
     def test(self, data, split="train", attention_visualization=False, save_sampled_captions=True):
-        features = data['features']
+        features = data[split + '_features']
 
         _, _, sampled_captions = self.model.build_sampler(max_len=20) # (N, max_len)
 
         config = tf.ConfigProto(allow_soft_placement=True)
-        config.gpu_options_allow_growth = True
+        # config.gpu_options_allow_growth = True
         with tf.Session(config=config) as sess:
-            saver = tf.train.saver()
+            saver = tf.train.Saver()
             saver.restore(sess, self.test_model)
             _, features_batch, image_urls = sample_coco_minibatch(data, self.batch_size)
             feed_dict = { self.model.features: features_batch }
