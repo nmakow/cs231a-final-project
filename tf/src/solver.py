@@ -80,7 +80,7 @@ class CaptioningSolver(object):
         print "Iterations per epoch: %d" % n_batches_train
 
         config = tf.ConfigProto(allow_soft_placement=True)
-        # config.gpu_options.allow_growth = True
+        config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
             sess.run(tf.global_variables_initializer())
 
@@ -127,18 +127,53 @@ class CaptioningSolver(object):
 
                 print "Previous epoch loss: ", prev_loss
                 print "Current epoch loss: ", curr_loss
-                print "Elapsed time: ", timetime() - start_time
+                print "Elapsed time: ", time.time() - start_time
                 prev_loss = curr_loss
                 curr_loss = 0
 
                 # TODO: BLEU evaluation
                 if self.print_bleu:
-                    pass
+                    all_gen_cap = np.ndarray((val_features.shape[0], 20))
+                    for i in range(n_batches_val):
+                        features_batch = val_features[i*self.batch_size:(i+1)*self.batch_size]
+                        feed_dict = { self.model.features: features_batch }
+                        all_gen_cap[i*self.batch_size:(i+1)*self.batch_size] = \
+                            sess.run(generated_captions, feed_dict=feed_dict)
+                    all_decoded = decode_captions(all_gen_cap, self.model.idx_to_word)
+                    save_pickle(all_decoded, "./data/val/val.candidate.captions.pkl")
+                    scores = evaluate(data_path="./data", split="val", get_scores=True)
+                    write_bleu(scores=scores, path=self.model_path, epoch=e)
 
                 if (e+1) % self.save_every == 0:
                     saver.save(sess, os.path.join(self.model_path, "model"), global_step=e+1)
                     print "model-%s saved" % (e+1)
 
 
-    def test(self):
-        pass
+    def test(self, data, split="train", attention_visualization=False, save_sampled_captions=True):
+        features = data['features']
+
+        _, _, sampled_captions = self.model.build_sampler(max_len=20) # (N, max_len)
+
+        config = tf.ConfigProto(allow_soft_placement=True)
+        config.gpu_options_allow_growth = True
+        with tf.Session(config=config) as sess:
+            saver = tf.train.saver()
+            saver.restore(sess, self.test_model)
+            _, features_batch, image_urls = sample_coco_minibatch(data, self.batch_size)
+            feed_dict = { self.model.features: features_batch }
+            out_captions = sess.run([sampled_captions], feed_dict) # (N, max_len)
+            decoded = decode_captions(out_captions, self.model.idx_to_word)
+
+            if attention_visualization:
+                # TODO: if implement attention, add this
+                pass
+
+            if save_sampled_captions:
+                all_out_captions = np.ndarray((features.shape[0], 20))
+                num_iter = int(np.ceil(float(features.shape[0]) / self.batch_size))
+                for i in xrange(num_iter):
+                    features_batch = features[i*self.batch_size:(i+1)*self.batch_size]
+                    feed_dict = { self.model.features: featuers_batch }
+                    all_out_captions[i*self.batch_size:(i+1)*self.batch_size] = sess.run(sampled_captions, feed_dict)
+                all_decoded = decode_captions(all_out_captions, self.model.idx_to_word)
+                save_pickle(all_decoded, "./data/%s/%s.candidate.captions.pkl" % (split, split))

@@ -25,7 +25,7 @@ def main():
                               batch_size=128,
                               update_rule="adam",
                               learning_rate=0.001,
-                              print_every=10,
+                              print_every=100,
                               save_every=1,
                               pretrained_model=None,
                               model_path="model/lstm/",
