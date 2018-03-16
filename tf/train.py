@@ -3,10 +3,10 @@ from src.model import CaptionGenerator
 from src.utils import load_coco_data
 
 def main():
-    # load dataset
-    data = load_coco_data(base_dir="./data/coco_captioning",
-                          pca_features=True,
-                          split="train")
+    # load train dataset
+    data = load_coco_data(split='train')
+
+    print data["train_captions"][:10]
 
     model = CaptionGenerator(data["word_to_idx"],
                              dim_feature=[128, 512],

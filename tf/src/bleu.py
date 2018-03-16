@@ -6,6 +6,7 @@ from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.rouge.rouge import Rouge
 from pycocoevalcap.cider.cider import Cider
 from pycocoevalcap.meteor.meteor import Meteor
+from src.utils import load_coco_data
 
 def score(ref, hypo):
     scorers = [
@@ -25,14 +26,18 @@ def score(ref, hypo):
     return final_scores
 
 def evaluate(data_path="./data", split="val", get_scores=False):
-    reference_path = os.path.join(data_path, "%s/%s.references.pkl" % (split, split))
+    data = load_coco_data(split=split)
+    # reference_path = os.path.join(data_path, "%s/%s.references.pkl" % (split, split))
     candidate_path = os.path.join(data_path, "%s/%s.candidate.captions.pkl" % (split, split))
 
     # load caption data
-    with open(reference_path, "rb") as f:
-        ref = pickle.load(f)
+    # with open(reference_path, "rb") as f:
+    #     ref = pickle.load(f)
     with open(candidate_path, "rb") as f:
         cand = pickle.load(f)
+
+    print len(cand)
+    print data["val_captions"].shape
 
     # make dictionary
     hypo = {}

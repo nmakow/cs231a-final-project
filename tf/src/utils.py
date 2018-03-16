@@ -2,11 +2,37 @@ from builtins import range
 import os, json
 import numpy as np
 import h5py
-import cPickle as pickle # for the word2idx file
+import time
+import cPickle as pickle # for the word2idx file_mode
+import hickle
 
-BASE_DIR = '../data/coco_captioning'
+# def load_coco_data(data_path='./data', split='train'):
+#     data_path = os.path.join(data_path, split)
+#     start_t = time.time()
+#     data = {}
+#
+#     data['features'] = hickle.load(os.path.join(data_path, '%s.features.hkl' %split))
+#     with open(os.path.join(data_path, '%s.file.names.pkl' %split), 'rb') as f:
+#         data['file_names'] = pickle.load(f)
+#     with open(os.path.join(data_path, '%s.captions.pkl' %split), 'rb') as f:
+#         data['captions'] = pickle.load(f)
+#     with open(os.path.join(data_path, '%s.image.idxs.pkl' %split), 'rb') as f:
+#         data['image_idxs'] = pickle.load(f)
+#
+#     if split == 'train':
+#         with open(os.path.join(data_path, 'word_to_idx.pkl'), 'rb') as f:
+#             data['word_to_idx'] = pickle.load(f)
+#
+#     for k, v in data.iteritems():
+#         if type(v) == np.ndarray:
+#             print k, type(v), v.shape, v.dtype
+#         else:
+#             print k, type(v), len(v)
+#     end_t = time.time()
+#     print "Elapse time: %.2f" %(end_t - start_t)
+#     return data
 
-def load_coco_data(base_dir=BASE_DIR,
+def load_coco_data(base_dir="./data/coco_captioning",
                    max_train=None,
                    pca_features=True,
                    split="train"):
@@ -14,6 +40,7 @@ def load_coco_data(base_dir=BASE_DIR,
     caption_file = os.path.join(base_dir, 'coco2014_captions.h5')
     with h5py.File(caption_file, 'r') as f:
         for k, v in f.items():
+            print k
             data[k] = np.asarray(v)
 
     if split == "train":
