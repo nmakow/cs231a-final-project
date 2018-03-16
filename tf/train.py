@@ -5,9 +5,8 @@ from src.utils import load_coco_data
 def main():
     # load dataset
     data = load_coco_data(base_dir="./data/coco_captioning",
-                          pca_features=True)
-
-    word_to_idx = data["word_to_idx"]
+                          pca_features=True,
+                          split="train")
 
     model = CaptionGenerator(data["word_to_idx"],
                              dim_feature=[128, 512],

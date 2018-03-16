@@ -8,15 +8,17 @@ BASE_DIR = '../data/coco_captioning'
 
 def load_coco_data(base_dir=BASE_DIR,
                    max_train=None,
-                   pca_features=True):
+                   pca_features=True,
+                   split="train"):
     data = {}
     caption_file = os.path.join(base_dir, 'coco2014_captions.h5')
     with h5py.File(caption_file, 'r') as f:
         for k, v in f.items():
             data[k] = np.asarray(v)
 
-    with open(os.path.join(base_dir, "word_to_idx.pkl"), "rb") as f:
-        data["word_to_idx"] = pickle.load(f)
+    if split == "train":
+        with open(os.path.join(base_dir, "word_to_idx.pkl"), "rb") as f:
+            data["word_to_idx"] = pickle.load(f)
 
     if pca_features:
         train_feat_file = os.path.join(base_dir, 'train2014_vgg16_fc7_pca.h5')
@@ -54,6 +56,12 @@ def load_coco_data(base_dir=BASE_DIR,
         mask = np.random.randint(num_train, size=max_train)
         data['train_captions'] = data['train_captions'][mask]
         data['train_image_idxs'] = data['train_image_idxs'][mask]
+
+    for k, v in data.iteritems():
+        if type(v) == np.ndarray:
+            print k, type(v), v.shape, v.dtype
+        else:
+            print k, type(v), len(v)
 
     return data
 
