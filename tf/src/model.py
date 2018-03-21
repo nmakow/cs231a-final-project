@@ -39,7 +39,7 @@ class CaptionGenerator(object):
         self.captions = tf.placeholder(tf.int32, [None, self.T + 1])
 
     def _get_initial_lstm(self, features, reuse=False):
-        with tf.variable_scope("initial_lstm"):
+        with tf.variable_scope("initial_lstm", reuse=tf.AUTO_REUSE):
             w_h_init = tf.get_variable("w_h_init", [self.D, self.H], initializer=self.weight_initializer)
             b_h_init = tf.get_variable("b_h_init", [self.H], initializer=self.const_initializer)
             w_c_init = tf.get_variable("w_c_init", [self.D, self.H], initializer=self.weight_initializer)
@@ -51,7 +51,7 @@ class CaptionGenerator(object):
 
 
     def _project_features(self, features, reuse=False):
-        with tf.variable_scope("feature_projection", reuse=reuse):
+        with tf.variable_scope("feature_projection", reuse=tf.AUTO_REUSE):
             w_proj = tf.get_variable("w_proj", [self.D, self.D], initializer=self.weight_initializer)
             # flat_features = tf.reshape(features, [-1, self.D])
             features_proj = tf.matmul(features, w_proj)
@@ -60,13 +60,13 @@ class CaptionGenerator(object):
 
 
     def _word_embedding(self, inputs, reuse=False):
-        with tf.variable_scope("word_embedding", reuse=reuse):
+        with tf.variable_scope("word_embedding", reuse=tf.AUTO_REUSE):
             embed = tf.get_variable("embed", [self.V, self.M], initializer=self.emb_initializer)
             x = tf.nn.embedding_lookup(embed, inputs, name="word_vector")
             return x
 
     def _get_logits(self, x, h, dropout=False, reuse=False):
-        with tf.variable_scope("logits", reuse=reuse):
+        with tf.variable_scope("logits", reuse=tf.AUTO_REUSE):
             w_h = tf.get_variable("w_h", [self.H, self.M], initializer=self.weight_initializer)
             b_h = tf.get_variable("b_h", [self.M], initializer=self.const_initializer)
             w_out = tf.get_variable("w_out", [self.M, self.V], initializer=self.weight_initializer)
@@ -107,7 +107,7 @@ class CaptionGenerator(object):
         lstm_cell = tf.nn.rnn_cell.BasicLSTMCell(num_units=self.H)
 
         for t in range(self.T):
-            with tf.variable_scope("lstm", reuse=(t!=0)):
+            with tf.variable_scope("lstm", reuse=tf.AUTO_REUSE):
                 _, (c, h) = lstm_cell(inputs=x[:,t,:], state=[c, h])
             logits = self._get_logits(x[:,t,:], h, dropout=self.dropout, reuse=(t!=0))
             loss += tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=captions_out[:, t], logits=logits)*mask[:, t])
